@@ -1,7 +1,7 @@
 install:
 	poetry install
 
-gendiff-help:
+gendiff:
 	poetry run gendiff -h
 
 build:
@@ -13,15 +13,14 @@ publish:
 package-install:
 	python3 -m pip install --user dist/*.whl
 
-package-uninstall-hc:
-	pip uninstall hexlet-code
-	rm -r dist
+package-reinstall:
+	python3 -m pip install --force-reinstall --user dist/hexlet_code-0.1.0-py3-none-any.whl
 
 lint:
 	poetry run flake8 gendiff
 
-pytest:
-	poetry run pytest
+test:
+	poetry run pytest -vv
 
 test-coverage:
 	poetry run pytest --cov=gendiff --cov-report xml
