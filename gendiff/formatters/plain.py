@@ -1,7 +1,3 @@
-def plain(diff):
-    return plainize(diff)
-
-
 def plainize(diff, path=''):
     result = []
     for item in diff:
