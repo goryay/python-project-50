@@ -1,7 +1,3 @@
-def stylish(diff, replacer=' ', spaces_count=1):
-    return stylize(diff, replacer, spaces_count)
-
-
 def stylize(diff, replacer=' ', spaces_count=1, level=1):
 
     result = []
