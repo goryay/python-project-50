@@ -1,60 +1,72 @@
-from gendiff.parse_data import get_file_data
-from gendiff.formatters.format import format_diff
+from gendiff.parse_data import make_value
+from gendiff.formatters.stylish import make_stylish
+from gendiff.formatters.plain import make_plain
+from gendiff.formatters.json import format_json
 
 
-def generate_diff(file1, file2, formatter='stylish'):
+STATUS = 'status'
+VALUE = 'value'
 
-    data1 = get_file_data(file1)
-    data2 = get_file_data(file2)
-    diff = build_diff_tree(data1, data2)
-    return format_diff(diff, formatter)
+FORMAT_FUNCTIONS = {'stylish': make_stylish,
+                    'plain': make_plain,
+                    'json': format_json,
+                    }
+DEFAULT_FORMAT_FUNCTIONS = 'stylish'
 
 
-def build_diff_tree(data1, data2):
-    diff = []
+def get_diff(old_data: dict, new_data: dict) -> dict:
+    '''
+    Creates a new dictionary of differences between two dictionaries.
+    Each key has a status field with key
+    (add, removed, changed, unchanged, nested).
+    '''
+    old_keys = list(old_data.keys())
+    new_keys = list(new_data.keys())
+    keys = set(old_keys + new_keys)
 
-    for key in sorted(list({**data1, **data2}.keys())):
+    res = {}
 
-        if key not in data2:
-            diff.append({
-                'key': key,
-                'action': 'deleted',
-                'old_value': data1[key]
-            })
+    for key in sorted(keys):
+        old_value = old_data.get(key)
+        new_value = new_data.get(key)
 
-        elif key not in data1:
-            diff.append({
-                'key': key,
-                'action': 'added',
-                'new_value': data2[key]
-            })
+        if isinstance(old_value, dict) and isinstance(new_value, dict):
+            res[key] = {STATUS: 'nested',
+                        VALUE: get_diff(old_value, new_value)
+                        }
 
-        elif key in data1 and key in data2:
+        elif key in old_keys and key not in new_keys:
+            res[key] = {STATUS: 'removed',
+                        VALUE: old_value}
 
-            if isinstance(data1[key], dict) \
-                    and isinstance(data2[key], dict):
-                diff.append({
-                    'key': key,
-                    'action': 'nested',
-                    'children': build_diff_tree(
-                        data1[key],
-                        data2[key]
-                    )
-                })
+        elif key not in old_keys and key in new_keys:
+            res[key] = {STATUS: 'add',
+                        VALUE: new_value}
 
-            elif data1[key] != data2[key]:
-                diff.append({
-                    'key': key,
-                    'action': 'updated',
-                    'old_value': data1[key],
-                    'new_value': data2[key],
-                })
+        elif old_value == new_value:
+            res[key] = {STATUS: 'unchanged', VALUE: old_value}
 
-            elif data1[key] == data2[key]:
-                diff.append({
-                    'key': key,
-                    'action': 'unchanged',
-                    'old_value': data1[key],
-                    'new_value': data2[key]
-                })
-    return diff
+        else:
+            res[key] = {STATUS: 'changed',
+                        'old_value': old_value,
+                        'new_value': new_value}
+
+    return res
+
+
+def generate_diff(path_file1: str,
+                  path_file2: str,
+                  format=DEFAULT_FORMAT_FUNCTIONS
+                  ) -> str:
+
+    old_data = make_value(path_file1)
+    new_data = make_value(path_file2)
+
+    if old_data == new_data:
+        return ''
+
+    values = get_diff(old_data, new_data)
+
+    res = FORMAT_FUNCTIONS[format](values)
+
+    return res
