@@ -1,24 +1,31 @@
 import json
 import yaml
-from yaml.loader import SafeLoader
-import os
+from os.path import splitext
 
 
-def get_file_data(file):
-    _, file_extension = os.path.splitext(file)
-    content = open(file, 'r')
-    return parse(content, file_extension[1:])
+def make_value(path: str) -> dict:
+    data = read_data(path)
+    extensions = {'.json': parse_json,
+                  '.yml': parse_yaml,
+                  '.yaml': parse_yaml,
+                  }
+    _, extension = splitext(path)
+
+    return extensions[extension](data)
 
 
-def parse(content, format):
-    match format:
-        case 'json':
-            return json.load(content)
-        case 'yml' | 'yaml':
-            return yaml.load(content, Loader=SafeLoader)
-        case _:
-            raise Exception(
-                f'Unknown extension: "{format}"! '
-                f'I can\'t parse it! '
-                f'Use "gendiff -h" to find extensions available'
-            )
+def read_data(path: str) -> str:
+    with open(path) as f:
+        return f.read()
+
+
+def parse_json(data: str) -> dict:
+    res = json.loads(data)
+
+    return res if isinstance(res, dict) else {}
+
+
+def parse_yaml(data: str) -> dict:
+    res = yaml.load(data, Loader=yaml.SafeLoader)
+
+    return res if isinstance(res, dict) else {}
