@@ -1,82 +1,81 @@
-def stylize(diff, replacer=' ', spaces_count=1, level=1):
+STATUS = 'status'
+VALUE = 'value'
 
-    result = []
-
-    for item in diff:
-
-        prekey_replacer = replacer * (spaces_count * level * 4 - 2)
-        prebracket_replacer = replacer * (spaces_count * level * 4)
-
-        match item['action']:
-
-            case 'nested':
-                result.append(
-                    f'{prekey_replacer}  {item["key"]}: {"{"}'
-                )
-                result.append(
-                    f'{stylize(item["children"], replacer, spaces_count, level + 1)}'
-                    f'\n{prebracket_replacer}{"}"}'
-                )
-
-            case 'added':
-                result.append(
-                    f'{prekey_replacer}+ {item["key"]}: '
-                    f'{to_str(item["new_value"], replacer, spaces_count, level)}'
-                )
-
-            case 'deleted':
-                result.append(
-                    f'{prekey_replacer}- {item["key"]}: '
-                    f'{to_str(item["old_value"], replacer, spaces_count, level)}'
-                )
-
-            case 'unchanged':
-                result.append(
-                    f'{prekey_replacer}  {item["key"]}: '
-                    f'{to_str(item["old_value"], replacer, spaces_count, level)}'
-                )
-
-            case 'updated':
-                result.append(
-                    f'{prekey_replacer}- {item["key"]}: '
-                    f'{to_str(item["old_value"], replacer, spaces_count, level)}'
-                )
-
-                result.append(
-                    f'{prekey_replacer}+ {item["key"]}: '
-                    f'{to_str(item["new_value"], replacer, spaces_count, level)}'
-                )
-
-    if level == 1:
-        result.insert(0, '{')
-        result.append('}')
-    return '\n'.join(result)
+BLOCK_START = '{'
+BLOCK_END = '}'
+INDENT = '    '
+NEW_PREFIX = '+ '
+OLD_PREFIX = '- '
+OFFSET = len(NEW_PREFIX)
 
 
-def to_str(val, replacer=' ', spaces_count=1, level=0):
-    result = []
+def format_value(value, nesting=0):
+    # res = value
 
-    if isinstance(val, dict):
-        prekey_replacer = replacer * (spaces_count * level * 4 + 4)
-        prebracket_replacer = replacer * (spaces_count * level * 4)
+    if isinstance(value, bool):
+        value = 'true' if value else 'false'
 
-        result.append('{')
-        for key in val:
+    elif value is None:
+        value = 'null'
 
-            result.append(
-                f'\n{prekey_replacer}{key}: '
-                f'{to_str(val[key], replacer, spaces_count + 1, level)}'
-            )
+    elif isinstance(value, int):
+        value = f'{value}'
 
-        result.append(f'\n{prebracket_replacer}{"}"}')
+    elif isinstance(value, dict):
+        res = f'{BLOCK_START}'
 
-    if isinstance(val, bool):
-        result.append(str(val).lower())
-    if val is None:
-        result.append('null')
-    if isinstance(val, str):
-        result.append(val)
-    if isinstance(val, int) and not isinstance(val, bool):
-        result.append(str(val))
+        for key, value_ in value.items():
+            res += f'\n{(nesting + 1) * INDENT}{key}: ' \
+                + format_value(value_, nesting + 1)
 
-    return ''.join(result)
+        res += f'\n{nesting * INDENT}{BLOCK_END}'
+        value = res
+
+    return value
+
+
+def make_line(key, value, nesting):
+    res = ''
+    prefix = (nesting + 1) * INDENT
+
+    if value[STATUS] == 'nested':
+        res += f'\n{prefix}{key}: {BLOCK_START}' \
+            + format_data(value[VALUE], nesting + 1) \
+            + f'\n{prefix}{BLOCK_END}'
+
+    elif value[STATUS] == 'unchanged':
+        res += f'\n{prefix}{key}: ' \
+            + format_value(value[VALUE], nesting + 1)
+
+    elif value[STATUS] == 'add':
+        res += f'\n{prefix[OFFSET:]}{NEW_PREFIX}{key}: ' \
+            + format_value(value[VALUE], nesting + 1)
+
+    elif value[STATUS] == 'removed':
+        res += f'\n{prefix[OFFSET:]}{OLD_PREFIX}{key}: ' \
+            + format_value(value[VALUE], nesting + 1)
+
+    elif value[STATUS] == 'changed':
+        res += f'\n{prefix[OFFSET:]}{OLD_PREFIX}{key}: ' \
+            + format_value(value['old_value'], nesting + 1)
+
+        res += f'\n{prefix[OFFSET:]}{NEW_PREFIX}{key}: ' \
+            + format_value(value['new_value'], nesting + 1)
+
+    return res
+
+
+def format_data(data: dict, nesting=0) -> list:
+    res = ''
+
+    # If dictionary sorting is broken.
+    for key, value in sorted(data.items(), key=lambda x: x[0]):
+        res += make_line(key, value, nesting)
+
+    return res
+
+
+def make_stylish(data: dict) -> str:
+    lines = format_data(data)
+
+    return f'{BLOCK_START}{lines}\n{BLOCK_END}'
