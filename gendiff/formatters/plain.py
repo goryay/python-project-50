@@ -1,44 +1,57 @@
-def plainize(diff, path=''):
-    result = []
-    for item in diff:
-        match item['action']:
-
-            case 'nested':
-                result.append(
-                    plainize(
-                        item['children'],
-                        f'{path}{str(item["key"])}.'
-                    )
-                )
-
-            case 'added':
-                result.append(
-                    f"Property '{path}{item['key']}' was added with value: "
-                    f"{format_val(item['new_value'])}"
-                )
-
-            case 'deleted':
-                result.append(
-                    f"Property '{path}{item['key']}' was removed"
-                )
-
-            case 'updated':
-                result.append(
-                    f"Property '{path}{item['key']}' was updated. "
-                    f"From {format_val(item['old_value'])} "
-                    f"to {format_val(item['new_value'])}"
-                )
-
-    return '\n'.join(result)
+STATUS = 'status'
+VALUE = 'value'
 
 
-def format_val(val):
-    if val is None:
-        return 'null'
-    if isinstance(val, dict):
+def format_value(value):
+    if isinstance(value, dict):
         return '[complex value]'
-    if isinstance(val, bool):
-        return str(val).lower()
-    if isinstance(val, str):
-        return f"'{val}'"
-    return str(val)
+
+    elif isinstance(value, bool):
+        return 'true' if value else 'false'
+
+    elif value is None:
+        return 'null'
+
+    elif isinstance(value, int):
+        return f'{value}'
+
+    return f"'{value}'"
+
+
+def make_lines(data: dict, path=[]) -> list:
+    res = []
+
+    for key, values in data.items():
+        path += [key]
+
+        if values[STATUS] == 'nested':
+            res += [value for value in make_lines(values[VALUE], path)]
+
+        elif values[STATUS] == 'add':
+            value = format_value(values[VALUE])
+            res += [f"Property '{'.'.join(path)}'"
+                    + f" was added with value: {value}"]
+
+        elif values[STATUS] == 'removed':
+            res += [f"Property '{'.'.join(path)}' was removed"]
+
+        elif values[STATUS] == 'changed':
+            old_value = format_value(values['old_value'])
+            new_value = format_value(values['new_value'])
+            res += [f"Property '{'.'.join(path)}'"
+                    + f" was updated. From {old_value} to {new_value}"]
+
+        path.pop()
+
+    return res
+
+
+def make_plain(data: dict) -> str:
+    lines = make_lines(data)
+
+    # If dictionary sorting is broken.
+    lines = sorted([''.join(v) for v in lines])
+
+    res = '\n'.join(lines)
+
+    return res
