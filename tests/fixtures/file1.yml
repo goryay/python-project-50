@@ -3,26 +3,15 @@ common:
   setting2: 200
   setting3: true
   setting6:
-    key: value
     doge:
-      wow: too much
-
+      wow: ''
+    key: value
 group1:
-  baz: bas
+  baz: 0
   foo: bar
   nest:
     key: value
-
 group2:
   abc: 12345
   deep:
     id: 45
-
-group4:
-  default: null
-  foo: 0
-  isNested: false
-  nest:
-    bar: ""
-    isNested: true
-  type: bas

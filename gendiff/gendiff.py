@@ -1,7 +1,7 @@
-from gendiff.parse_data import make_value
-from gendiff.formatters.stylish import make_stylish
-from gendiff.formatters.plain import make_plain
-from gendiff.formatters.json import format_json
+from gendiff.make_data import make_value
+from gendiff.format.stylish import make_stylish
+from gendiff.format.plain import make_plain
+from gendiff.format.json import format_json
 
 
 STATUS = 'status'
