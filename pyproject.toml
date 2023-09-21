@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hexlet-code"
-version = "0.1.0"
+version = "0.3.5"
 description = "Shows the difference between two files."
 authors = ["goryay <iam.goryn@gmail.com>"]
 license = "0.1.0"
