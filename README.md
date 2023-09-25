@@ -32,5 +32,5 @@
 
 
 # Пример
-
+[![asciicast](https://asciinema.org/a/qMzYDIJ1zZVf5rNsbjzWJKFQp.svg)](https://asciinema.org/a/qMzYDIJ1zZVf5rNsbjzWJKFQp)
 
