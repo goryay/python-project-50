@@ -1,6 +1,3 @@
-STATUS = 'status'
-VALUE = 'value'
-
 
 def format_value(value):
     if isinstance(value, dict):

@@ -1,5 +1,3 @@
-STATUS = 'status'
-VALUE = 'value'
 
 BLOCK_START = '{'
 BLOCK_END = '}'

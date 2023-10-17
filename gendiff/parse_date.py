@@ -3,7 +3,7 @@ import yaml
 from os.path import splitext
 
 
-def make_value(path: str) -> dict:
+def get_value(path: str) -> dict:
     data = read_data(path)
     extensions = {'.json': parse_json,
                   '.yml': parse_yaml,

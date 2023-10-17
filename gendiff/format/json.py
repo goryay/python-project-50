@@ -1,6 +1,6 @@
-import json as j
+import json
 
 
 def format_json(data: dict) -> str:
 
-    return j.dumps(data, sort_keys=True, indent=4)
+    return json.dumps(data, sort_keys=True, indent=4)
