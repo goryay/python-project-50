@@ -1,3 +1,5 @@
+from gendiff.get_diff import STATUS, VALUE
+
 
 BLOCK_START = '{'
 BLOCK_END = '}'
