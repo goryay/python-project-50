@@ -5,6 +5,8 @@ from gendiff.format.plain import make_plain
 from gendiff.format.json import format_json
 
 
+DEFAULT_FORMAT_FUNCTIONS = 'stylish'
+
 def generate_diff(path_file1: str,
                   path_file2: str,
                   format=make_stylish
