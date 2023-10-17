@@ -9,7 +9,7 @@ DEFAULT_FORMAT_FUNCTIONS = 'stylish'
 
 def generate_diff(path_file1: str,
                   path_file2: str,
-                  format=make_stylish
+                  format=DEFAULT_FORMAT_FUNCTIONS
                   ) -> str:
 
     old_data = get_value(path_file1)
