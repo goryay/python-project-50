@@ -1,3 +1,4 @@
+from gendiff.parse_data import get_value
 from gendiff.format.stylish import make_stylish
 from gendiff.format.plain import make_plain
 from gendiff.format.json import format_json
