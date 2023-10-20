@@ -1,7 +1,3 @@
-from gendiff.format.stylish import make_stylish
-from gendiff.format.plain import make_plain
-from gendiff.format.json import format_json
-
 
 STATUS = 'status'
 VALUE = 'value'
