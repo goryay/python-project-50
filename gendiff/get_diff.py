@@ -3,12 +3,6 @@
 STATUS = 'status'
 VALUE = 'value'
 
-FORMAT_FUNCTIONS = {'stylish': make_stylish,
-                    'plain': make_plain,
-                    'json': format_json,
-                    }
-DEFAULT_FORMAT_FUNCTIONS = 'stylish'
-
 
 def get_diff(old_data: dict, new_data: dict) -> dict:
     '''
