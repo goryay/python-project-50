@@ -17,8 +17,8 @@ def generate_diff(path_file1: str,
                   format=DEFAULT_FORMAT_FUNCTIONS
                   ) -> str:
 
-    old_data = make_value(path_file1)
-    new_data = make_value(path_file2)
+    old_data = get_value(path_file1)
+    new_data = get_value(path_file2)
 
     if old_data == new_data:
         return ''
